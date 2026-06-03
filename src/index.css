@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   Theme tokens — one source of truth for both light and dark. The ported pages
+   use light Tailwind utilities (bg-white, text-slate-*, border-slate-*) and
+   Bootstrap controls; we remap those to these tokens so the two themes stay in
+   lockstep and stay professional.
+   ============================================================================ */
+:root {
+  /* Brand — Comply.now green */
+  --brand-50: #ecfdf5;
+  --brand-400: #34d399;
+  --brand-500: #10b981;
+  --brand: #059669;          /* 600 */
+  --brand-hover: #047857;    /* 700 */
+  --brand-active: #065f46;   /* 800 */
+  --brand-rgb: 5, 150, 105;
+
+  /* Light theme */
+  --canvas: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-hover: #eaeff6;
+  --text-strong: #0f172a;
+  --text: #344256;
+  --text-muted: #687587;
+  --text-faint: #98a3b3;
+  --border: #e7ebf2;
+  --border-strong: #d4dbe6;
+  --input-bg: #ffffff;
+  --input-border: #d6dde8;
+  --input-text: #0f172a;
+  --input-placeholder: #9aa6b8;
+  --ring: rgba(5, 150, 105, 0.16);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 20px rgba(16, 24, 40, 0.07);
+  --shadow-pop: 0 12px 36px rgba(16, 24, 40, 0.14);
+  --accent: #7c3aed;                       /* secondary accent (wizard) */
+  --select-arrow: %23687587;               /* url-encoded chevron stroke */
+}
+
+html.dark {
+  --canvas: #0a1120;
+  --surface: #131f33;
+  --surface-2: #0f1a2b;
+  --surface-hover: #1b2942;
+  --text-strong: #f1f5f9;
+  --text: #cdd6e4;
+  --text-muted: #8a98b1;
+  --text-faint: #647288;
+  --border: #243449;
+  --border-strong: #324259;
+  --input-bg: #0e1a2b;
+  --input-border: #2b3c55;
+  --input-text: #eef2f8;
+  --input-placeholder: #5d6c84;
+  --ring: rgba(16, 185, 129, 0.28);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.42);
+  --shadow-pop: 0 16px 44px rgba(0, 0, 0, 0.55);
+  --accent: #a78bfa;
+  --select-arrow: %23cdd6e4;
+}
+
+/* ============================================================================
+   Base
+   ============================================================================ */
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--canvas);
+  color: var(--text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+::selection { background: rgba(var(--brand-rgb), 0.22); }
+a { color: var(--brand); text-decoration: none; }
+a:hover { color: var(--brand-hover); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+hr { border-color: var(--border); opacity: 1; }
+
+/* Refined scrollbars (both themes) */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); background-clip: content-box; }
+
+/* ============================================================================
+   Inputs — polished, token-driven, identical behaviour in both themes
+   ============================================================================ */
+.form-control, .form-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.form-control::placeholder { color: var(--input-placeholder); opacity: 1; }
+.form-control:hover, .form-select:hover { border-color: var(--border-strong); }
+.form-control:focus, .form-select:focus {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+.form-control:disabled, .form-select:disabled { background-color: var(--surface-2); opacity: 0.7; }
+textarea.form-control { border-radius: 12px; line-height: 1.5; }
+.form-label { color: var(--text); font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem; }
+/* Dark-mode chevron for native selects (Bootstrap's default arrow is dark). */
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='var(--select-arrow)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); width: 1rem; height: 1rem; }
+
+/* ============================================================================
+   Buttons — brand green with a subtle lift
+   ============================================================================ */
+.btn { border-radius: 10px; font-weight: 600; transition: transform 0.08s ease, box-shadow 0.15s ease, background-color 0.15s ease; }
+.btn-primary, .btn-success {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-hover);
+  --bs-btn-hover-border-color: var(--brand-hover);
+  --bs-btn-active-bg: var(--brand-active);
+  --bs-btn-active-border-color: var(--brand-active);
+  --bs-btn-disabled-bg: var(--brand);
+  --bs-btn-disabled-border-color: var(--brand);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+  box-shadow: 0 1px 2px rgba(var(--brand-rgb), 0.3);
+}
+.btn-primary:hover, .btn-success:hover { box-shadow: 0 6px 16px rgba(var(--brand-rgb), 0.34); transform: translateY(-1px); }
+.btn-primary:active, .btn-success:active { transform: translateY(0); }
+.btn-outline-primary, .btn-outline-success {
+  --bs-btn-color: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-border-color: var(--brand);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--brand-active);
+  --bs-btn-active-border-color: var(--brand-active);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--text-muted);
+  --bs-btn-border-color: var(--border-strong);
+  --bs-btn-hover-bg: var(--surface-2);
+  --bs-btn-hover-color: var(--text-strong);
+  --bs-btn-hover-border-color: var(--border-strong);
+}
+
+/* ============================================================================
+   Surface / text / border utility remapping (drives BOTH themes via tokens)
+   ============================================================================ */
+.bg-white { background-color: var(--surface) !important; }
+.bg-slate-50 { background-color: var(--surface-2) !important; }
+.bg-slate-100 { background-color: var(--surface-2) !important; }
+.hover\:bg-slate-100:hover, .hover\:bg-slate-50:hover { background-color: var(--surface-hover) !important; }
+
+.text-slate-900, .text-slate-800 { color: var(--text-strong) !important; }
+.text-slate-700, .text-slate-600 { color: var(--text) !important; }
+.text-slate-500 { color: var(--text-muted) !important; }
+.text-slate-400, .text-slate-300 { color: var(--text-faint) !important; }
+
+.border, .border-t, .border-b, .border-x, .border-y,
+.border-slate-200, .border-slate-300 { border-color: var(--border) !important; }
+.ring-slate-200 { --tw-ring-color: var(--border) !important; }
+
+/* Elevation — give cards real depth in both themes (Tailwind's dark shadow is invisible). */
+.shadow-sm { box-shadow: var(--shadow-sm) !important; }
+.shadow { box-shadow: var(--shadow-card) !important; }
+.shadow-xl { box-shadow: var(--shadow-pop) !important; }
+
+/* Brand-tinted states */
+.bg-emerald-50 { background-color: var(--brand-50) !important; }
+.text-emerald-700 { color: var(--brand-hover) !important; }
+html.dark .bg-emerald-50 { background-color: rgba(var(--brand-rgb), 0.16) !important; }
+html.dark .bg-emerald-100 { background-color: rgba(var(--brand-rgb), 0.22) !important; }
+html.dark .text-emerald-700 { color: var(--brand-400) !important; }
+
+/* ============================================================================
+   Dark-only refinements for accent tints used by the wizard + profiler cards.
+   (Saturated fills like bg-violet-600 / bg-emerald-600 are left untouched.)
+   ============================================================================ */
+html.dark .bg-violet-50, html.dark .bg-violet-100 { background-color: rgba(124, 58, 237, 0.20) !important; }
+html.dark .text-violet-700, html.dark .text-violet-600 { color: #c4b5fd !important; }
+html.dark .border-violet-200, html.dark .border-violet-400 { border-color: #7c3aed !important; }
+html.dark .hover\:border-violet-400:hover { border-color: #8b5cf6 !important; }
+html.dark .bg-violet-50\/40 { background-color: rgba(124, 58, 237, 0.12) !important; }
+
+html.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.14) !important; }
+html.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22) !important; }
+html.dark .text-amber-800, html.dark .text-amber-700 { color: #fbbf24 !important; }
+
+html.dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.14) !important; }
+html.dark .text-rose-700, html.dark .text-rose-600 { color: #fb7185 !important; }
+
+html.dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.22) !important; }
+html.dark .text-blue-700, html.dark .text-blue-600 { color: #93c5fd !important; }
+
+/* Page-background gradients flatten to the canvas in dark (keep the green header). */
+html.dark .bg-gradient-to-br.from-slate-50,
+html.dark .bg-gradient-to-br.from-slate-100 {
+  background-image: none !important;
+  background-color: var(--canvas) !important;
+}
+
+/* ============================================================================
+   Bootstrap tables
+   ============================================================================ */
+.table { --bs-table-color: var(--text); color: var(--text); border-color: var(--border); }
+.table > :not(caption) > * > * { border-color: var(--border); }
+html.dark .table { --bs-table-bg: transparent; }
+.table thead th, .table-light {
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border);
+  font-weight: 600;
+}
