@@ -30,7 +30,7 @@ WORKDIR /app
 RUN npm install -g serve
 
 # Only copy the production-ready build folder from the builder stage
-COPY --from=builder /app/build ./build
+COPY --from=builder /app/dist ./dist
 
 # Expose the application port
 EXPOSE 3000
