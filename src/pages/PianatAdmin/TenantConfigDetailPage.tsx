@@ -6,8 +6,10 @@
  */
 import React, { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { AlertTriangle, Save } from 'lucide-react';
+import { AlertTriangle, Save, Sparkles } from 'lucide-react';
 import {
+  CompanyProfileResult,
+  getCompanyProfileByTenant,
   getFrameworkCodes,
   getModuleCatalog,
   getTenantDetail,
@@ -20,6 +22,7 @@ import {
   setModules,
   suspendTenant,
   TenantDetail,
+  updateCompanyProfile,
   UsageVsLimit,
 } from '../../services/pianatAdminServices';
 import { PianatShell, useAsync, useIsAr, tr, Loading, ErrorBox, Panel, headerBtn } from './common';
@@ -43,6 +46,7 @@ const TenantConfigDetailPage: React.FC = () => {
   const catalog = useAsync<ModuleCatalogEntry[]>(() => getModuleCatalog(), []);
   const frameworksList = useAsync<string[]>(() => getFrameworkCodes(), []);
   const FRAMEWORKS = frameworksList.data ?? [];
+  const profileRun = useAsync(() => getCompanyProfileByTenant(id!), [id]);
   const [tab, setTab] = useState<'overview' | 'config'>('overview');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -121,7 +125,7 @@ const TenantConfigDetailPage: React.FC = () => {
     >
       <div className="mb-4 flex gap-2">
         {(['overview', 'config'] as const).map((tk) => (
-          <button key={tk} className={`rounded-full px-4 py-1 text-sm ${tab === tk ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600'}`} onClick={() => setTab(tk)}>
+          <button key={tk} className={`rounded-full px-4 py-1 text-sm ${tab === tk ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`} onClick={() => setTab(tk)}>
             {tk === 'overview' ? tr(isAr, 'Overview', 'نظرة عامة') : tr(isAr, 'Configuration', 'الإعدادات')}
           </button>
         ))}
@@ -162,6 +166,15 @@ const TenantConfigDetailPage: React.FC = () => {
             </div>
           )}
         </Panel>
+      )}
+
+      {tab === 'overview' && profileRun.data?.profile && (
+        <WebProfilerPanel
+          runId={profileRun.data.id}
+          profile={profileRun.data.profile}
+          isAr={isAr}
+          onSaved={profileRun.reload}
+        />
       )}
 
       {tab === 'config' && (
@@ -223,6 +236,118 @@ const TenantConfigDetailPage: React.FC = () => {
         </div>
       )}
     </PianatShell>
+  );
+};
+
+/**
+ * Web-profiler data captured at onboarding, stored against the tenant. Ops can
+ * edit it here and it persists — so it's visible again on the next visit.
+ */
+const WebProfilerPanel: React.FC<{
+  runId: string;
+  profile: CompanyProfileResult;
+  isAr: boolean;
+  onSaved: () => void;
+}> = ({ runId, profile, isAr, onSaved }) => {
+  const wp = profile.wizard_prefill;
+  const [f, setF] = useState({
+    legal_name_en: wp.legal_name_en ?? '',
+    name_ar: wp.name_ar ?? '',
+    country: wp.country ?? '',
+    industry: wp.industry ?? '',
+    website: wp.website ?? '',
+    egx_ticker: wp.egx_ticker ?? '',
+    note: profile.web_search_note ?? '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const upd = (k: keyof typeof f, v: string) => {
+    setF((s) => ({ ...s, [k]: v }));
+    setSaved(false);
+  };
+  const save = async () => {
+    setSaving(true);
+    try {
+      await updateCompanyProfile(runId, {
+        wizard_prefill: {
+          ...wp,
+          legal_name_en: f.legal_name_en || null,
+          name_ar: f.name_ar || null,
+          country: f.country || null,
+          industry: f.industry || null,
+          website: f.website || null,
+          egx_ticker: f.egx_ticker || null,
+        },
+        web_search_note: f.note,
+      } as any);
+      setSaved(true);
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const regulators = profile.regulatory_candidates?.regulators ?? [];
+  const cls = profile.suggested_classification;
+
+  return (
+    <Panel className="mt-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
+          <Sparkles size={16} className="text-emerald-600" />
+          {tr(isAr, 'Web profiler data', 'بيانات محلّل الويب')}
+        </h2>
+        <button className="btn btn-sm btn-primary d-flex align-items-center" style={{ gap: 4 }} disabled={saving} onClick={save}>
+          <Save size={13} /> {saved ? tr(isAr, 'Saved', 'تم الحفظ') : tr(isAr, 'Save', 'حفظ')}
+        </button>
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        {profile.requires_review && !(profile as any).verified && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">{tr(isAr, 'Needs review', 'بحاجة لمراجعة')}</span>
+        )}
+        {regulators.map((r) => <span key={r} className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">{r}</span>)}
+        {cls?.value && (
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+            {cls.value === 'enterprise' ? tr(isAr, 'Enterprise', 'مؤسسي') : tr(isAr, 'Simple', 'بسيط')}
+          </span>
+        )}
+        <span className="text-slate-400">
+          {tr(isAr, 'confidence', 'الثقة')} {Math.round((profile.confidence ?? 0) * 100)}%
+        </span>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'Legal name (EN)', 'الاسم القانوني')}</label>
+          <input className="form-control" value={f.legal_name_en} onChange={(e) => upd('legal_name_en', e.target.value)} />
+        </div>
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'Name (AR)', 'الاسم بالعربية')}</label>
+          <input className="form-control" dir="rtl" value={f.name_ar} onChange={(e) => upd('name_ar', e.target.value)} />
+        </div>
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'Country', 'الدولة')}</label>
+          <input className="form-control" value={f.country} onChange={(e) => upd('country', e.target.value)} />
+        </div>
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'Industry', 'القطاع')}</label>
+          <input className="form-control" value={f.industry} onChange={(e) => upd('industry', e.target.value)} />
+        </div>
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'Website', 'الموقع')}</label>
+          <input className="form-control" value={f.website} onChange={(e) => upd('website', e.target.value)} />
+        </div>
+        <div>
+          <label className="form-label text-xs">{tr(isAr, 'EGX ticker', 'رمز البورصة')}</label>
+          <input className="form-control" value={f.egx_ticker} onChange={(e) => upd('egx_ticker', e.target.value)} />
+        </div>
+        <div className="md:col-span-2">
+          <label className="form-label text-xs">{tr(isAr, 'Notes', 'ملاحظات')}</label>
+          <textarea className="form-control" rows={2} value={f.note} onChange={(e) => upd('note', e.target.value)} />
+        </div>
+      </div>
+    </Panel>
   );
 };
 

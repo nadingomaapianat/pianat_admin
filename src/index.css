@@ -38,7 +38,6 @@
   --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 20px rgba(16, 24, 40, 0.07);
   --shadow-pop: 0 12px 36px rgba(16, 24, 40, 0.14);
   --accent: #7c3aed;                       /* secondary accent (wizard) */
-  --select-arrow: %23687587;               /* url-encoded chevron stroke */
 }
 
 html.dark {
@@ -46,22 +45,22 @@ html.dark {
   --surface: #131f33;
   --surface-2: #0f1a2b;
   --surface-hover: #1b2942;
-  --text-strong: #f1f5f9;
-  --text: #cdd6e4;
-  --text-muted: #8a98b1;
-  --text-faint: #647288;
+  /* Text: clear, near-white scale for strong dark-mode legibility. */
+  --text-strong: #ffffff;
+  --text: #eef2f8;
+  --text-muted: #c2cbda;
+  --text-faint: #9aa7bd;
   --border: #243449;
-  --border-strong: #324259;
+  --border-strong: #3a4a63;
   --input-bg: #0e1a2b;
-  --input-border: #2b3c55;
-  --input-text: #eef2f8;
-  --input-placeholder: #5d6c84;
+  --input-border: #34465f;
+  --input-text: #ffffff;
+  --input-placeholder: #7886a0;
   --ring: rgba(16, 185, 129, 0.28);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.42);
   --shadow-pop: 0 16px 44px rgba(0, 0, 0, 0.55);
   --accent: #a78bfa;
-  --select-arrow: %23cdd6e4;
 }
 
 /* ============================================================================
@@ -116,9 +115,13 @@ hr { border-color: var(--border); opacity: 1; }
 .form-control:disabled, .form-select:disabled { background-color: var(--surface-2); opacity: 0.7; }
 textarea.form-control { border-radius: 12px; line-height: 1.5; }
 .form-label { color: var(--text); font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem; }
-/* Dark-mode chevron for native selects (Bootstrap's default arrow is dark). */
+/* Select chevron — set per theme (CSS vars can't interpolate inside url()).
+   Light = slate stroke, dark = light stroke so the arrow stays visible. */
 .form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='var(--select-arrow)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23687587' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+html.dark .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cdd6e4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); width: 1rem; height: 1rem; }
 
@@ -184,25 +187,33 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); width:
 .bg-emerald-50 { background-color: var(--brand-50) !important; }
 .text-emerald-700 { color: var(--brand-hover) !important; }
 html.dark .bg-emerald-50 { background-color: rgba(var(--brand-rgb), 0.16) !important; }
+html.dark .bg-emerald-50\/40 { background-color: rgba(var(--brand-rgb), 0.12) !important; }
 html.dark .bg-emerald-100 { background-color: rgba(var(--brand-rgb), 0.22) !important; }
-html.dark .text-emerald-700 { color: var(--brand-400) !important; }
+html.dark .text-emerald-700, html.dark .text-emerald-600 { color: var(--brand-400) !important; }
+html.dark .text-emerald-900 { color: #a7f3d0 !important; }
+html.dark .border-emerald-200, html.dark .border-emerald-300 { border-color: rgba(var(--brand-rgb), 0.5) !important; }
 
 /* ============================================================================
    Dark-only refinements for accent tints used by the wizard + profiler cards.
    (Saturated fills like bg-violet-600 / bg-emerald-600 are left untouched.)
    ============================================================================ */
 html.dark .bg-violet-50, html.dark .bg-violet-100 { background-color: rgba(124, 58, 237, 0.20) !important; }
-html.dark .text-violet-700, html.dark .text-violet-600 { color: #c4b5fd !important; }
-html.dark .border-violet-200, html.dark .border-violet-400 { border-color: #7c3aed !important; }
+html.dark .text-violet-900, html.dark .text-violet-800, html.dark .text-violet-700, html.dark .text-violet-600 { color: #ddd6fe !important; }
+html.dark .border-violet-200, html.dark .border-violet-300, html.dark .border-violet-400 { border-color: #7c3aed !important; }
 html.dark .hover\:border-violet-400:hover { border-color: #8b5cf6 !important; }
 html.dark .bg-violet-50\/40 { background-color: rgba(124, 58, 237, 0.12) !important; }
+/* Translucent-white inner boxes → faint light fill so light text stays legible. */
+html.dark .bg-white\/70, html.dark .bg-white\/60 { background-color: rgba(255, 255, 255, 0.07) !important; }
 
 html.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.14) !important; }
 html.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22) !important; }
 html.dark .text-amber-800, html.dark .text-amber-700 { color: #fbbf24 !important; }
 
 html.dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.14) !important; }
-html.dark .text-rose-700, html.dark .text-rose-600 { color: #fb7185 !important; }
+html.dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.22) !important; }
+html.dark .text-rose-800, html.dark .text-rose-700, html.dark .text-rose-600 { color: #fda4af !important; }
+html.dark .border-rose-300 { border-color: #9f1239 !important; }
+html.dark .text-emerald-800 { color: #6ee7b7 !important; }
 
 html.dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.22) !important; }
 html.dark .text-blue-700, html.dark .text-blue-600 { color: #93c5fd !important; }

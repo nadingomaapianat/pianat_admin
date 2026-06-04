@@ -17,7 +17,7 @@ function readInitial(): Theme {
   } catch {
     /* ignore */
   }
-  return 'light';
+  return 'dark'; // dark is the default theme
 }
 
 function applyTheme(theme: Theme): void {

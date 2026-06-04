@@ -198,6 +198,23 @@ export async function deepenCompanyProfile(id: string): Promise<{ id: string; st
   return api.post(`/api/pianat-admin/company-profiler/${encodeURIComponent(id)}/deepen`);
 }
 
+/** Link a finished profile to a newly-provisioned tenant. */
+export async function attachCompanyProfile(id: string, tenantId: string): Promise<any> {
+  return api.post(`/api/pianat-admin/company-profiler/${encodeURIComponent(id)}/attach`, { tenant_id: tenantId });
+}
+
+/** The web-profiler data stored against a tenant (detail page). */
+export async function getCompanyProfileByTenant(
+  tenantId: string,
+): Promise<{ id: string; status: CompanyProfileStatus; profile: CompanyProfileResult | null; updated_at: string } | null> {
+  return api.get(`/api/pianat-admin/company-profiler/by-tenant/${encodeURIComponent(tenantId)}`);
+}
+
+/** Persist ops edits to a stored profile. */
+export async function updateCompanyProfile(id: string, profile: Partial<CompanyProfileResult>): Promise<{ id: string; profile: CompanyProfileResult }> {
+  return api.put(`/api/pianat-admin/company-profiler/${encodeURIComponent(id)}`, { profile });
+}
+
 // ── Tenant list / detail / config ───────────────────────────────────────
 
 export interface TenantListRow {
@@ -261,6 +278,29 @@ export async function listTenants(opts: {
 
 export async function getTenantDetail(id: string): Promise<TenantDetail> {
   return api.get<TenantDetail>(`/api/pianat-admin/tenants/${encodeURIComponent(id)}`);
+}
+
+export interface DedupMatch {
+  id: string;
+  name: string;
+  name_ar: string | null;
+  slug: string;
+  archetype: string;
+  matched_on: 'name' | 'name_ar' | 'slug';
+}
+
+/** Authoritative duplicate check against the tenants table (wizard Step 9 gate). */
+export async function dedupCheckTenant(opts: {
+  name?: string;
+  name_ar?: string;
+  cr?: string;
+}): Promise<{ matches: DedupMatch[] }> {
+  const p = new URLSearchParams();
+  if (opts.name) p.set('name', opts.name);
+  if (opts.name_ar) p.set('name_ar', opts.name_ar);
+  if (opts.cr) p.set('cr', opts.cr);
+  const q = p.toString();
+  return api.get(`/api/pianat-admin/tenants/dedup-check${q ? `?${q}` : ''}`);
 }
 
 export async function getUsageVsLimits(id: string): Promise<Record<string, UsageVsLimit>> {
