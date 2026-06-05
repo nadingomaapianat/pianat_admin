@@ -8,11 +8,11 @@ export default {
       colors: {
         // Brand green (matches the Comply.now logo mark). Used to unify buttons.
         brand: {
-          50: '#ecfdf5',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
+          50: '#eafff4',
+          500: '#08ffa9',
+          600: '#00e99b',
+          700: '#0aa866',
+          800: '#078a54',
         },
       },
     },

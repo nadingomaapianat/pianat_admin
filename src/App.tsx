@@ -5,10 +5,7 @@ import { Building2, LayoutDashboard, FileText, DollarSign, LogOut, Languages, Su
 import { TenantProvider, useTenant } from './context/TenantContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { clearToken, getToken } from './services/apiClient';
-
-// The Comply.now wordmark shown when the sidebar is open in the original app.
-// It's a white logo, so it sits on a dark branded badge to stay legible.
-const COMPLY_LOGO = '/assets/images/2nd Logo Light.svg';
+import COMPLY_LOGO from '../Full Logo light.svg';
 
 import Login from './pages/Login';
 import TenantManagementPage from './pages/PianatAdmin/TenantManagementPage';
@@ -29,7 +26,7 @@ const NAV = [
   { to: '/pianat-admin/billing', label: 'Billing', icon: DollarSign },
 ];
 
-const TopBar: React.FC = () => {
+const Sidebar: React.FC = () => {
   const { currentTenant } = useTenant();
   const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -46,65 +43,74 @@ const TopBar: React.FC = () => {
     navigate('/login', { replace: true });
   };
   return (
-    <div className="sticky top-0 z-50 flex items-center gap-1 border-b border-slate-200 bg-white px-4 py-2 shadow-sm">
-      <div className="me-3 flex items-center gap-2">
-        <span className="flex items-center rounded-lg bg-slate-900 px-3 py-1.5 dark:bg-slate-950">
-          <img src={COMPLY_LOGO} alt="Comply.now" className="h-5 w-auto" />
-        </span>
-        <span className="hidden text-sm font-semibold text-slate-500 sm:inline dark:text-slate-400">Admin</span>
+    <aside className="sticky top-0 h-screen w-[280px] shrink-0 border-r border-white/10 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950 p-3">
+      <div className="flex h-full flex-col">
+        <div className="mb-4 px-2 pt-2">
+          <img src={COMPLY_LOGO} alt="Comply.now" className="logo-img h-7 w-auto" />
+          <div className="mt-2 text-xs font-semibold text-white/70">Pianat Admin</div>
+        </div>
+
+        <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
+          {NAV.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
+                  isActive
+                    ? 'bg-white/10 font-semibold text-white'
+                    : 'text-white/75 hover:bg-white/5 hover:text-white'
+                }`
+              }
+            >
+              <Icon size={16} />
+              <span className="truncate">{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-2 shadow-sm">
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white/85">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+            <span className="truncate">{currentTenant?.username ?? currentTenant?.name ?? 'Signed in'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <button
+              className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title="Change language"
+              onClick={toggleLang}
+            >
+              <Languages size={15} />
+              {isAr ? 'AR' : 'EN'}
+            </button>
+            <button
+              className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-rose-300"
+              title="Sign out"
+              onClick={logout}
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
       </div>
-      <nav className="flex flex-1 flex-wrap items-center gap-1">
-        {NAV.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
-                isActive ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100'
-              }`
-            }
-          >
-            <Icon size={15} /> {label}
-          </NavLink>
-        ))}
-      </nav>
-      <span className="me-1 hidden items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 sm:inline-flex dark:bg-slate-800 dark:text-slate-300">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        {currentTenant?.username ?? currentTenant?.name}
-      </span>
-      <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/60">
-        <button
-          className="grid h-8 w-8 place-items-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-amber-500 hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-amber-300"
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          onClick={toggleTheme}
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-        <button
-          className="flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-white hover:text-emerald-600 hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-emerald-300"
-          title="Change language"
-          onClick={toggleLang}
-        >
-          <Languages size={15} />
-          {isAr ? 'AR' : 'EN'}
-        </button>
-        <button
-          className="grid h-8 w-8 place-items-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-rose-600 hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-rose-400"
-          title="Sign out"
-          onClick={logout}
-        >
-          <LogOut size={16} />
-        </button>
-      </div>
-    </div>
+    </aside>
   );
 };
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
-    <TopBar />
-    <Suspense fallback={null}>{children}</Suspense>
-  </>
+  <div className="flex min-h-screen">
+    <Sidebar />
+    <div className="min-w-0 flex-1">
+      <Suspense fallback={null}>{children}</Suspense>
+    </div>
+  </div>
 );
 
 /** Guard for the whole authenticated area — no token → login. */
