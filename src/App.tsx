@@ -5,6 +5,7 @@ import { Building2, LayoutDashboard, FileText, DollarSign, LogOut, Languages, Su
 import { TenantProvider, useTenant } from './context/TenantContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { clearToken, getToken } from './services/apiClient';
+import ChatWidget from './components/ChatWidget';
 import COMPLY_LOGO from '../Full Logo light.svg';
 
 import Login from './pages/Login';
@@ -162,6 +163,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="min-w-0 flex-1">
       <Suspense fallback={null}>{children}</Suspense>
     </div>
+    <ChatWidget context="admin" />
   </div>
 );
 
