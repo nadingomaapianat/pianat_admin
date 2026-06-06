@@ -33,7 +33,7 @@ const TenantManagementPage: React.FC = () => {
       actions={
         <Link to="/pianat-admin/tenants/new" className={headerBtnPrimary}>
           <Plus size={16} />
-          {tr(isAr, 'Provision tenant', 'إنشاء جهة')}
+          {tr(isAr, 'Create tenant', 'إنشاء جهة')}
         </Link>
       }
     >
