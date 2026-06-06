@@ -6,7 +6,7 @@ import { TenantProvider, useTenant } from './context/TenantContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { clearToken, getToken } from './services/apiClient';
 import ChatWidget from './components/ChatWidget';
-import COMPLY_LOGO from '../Full Logo light.svg';
+import COMPLY_LOGO from '../2nd Logo Light.svg';
 
 import Login from './pages/Login';
 import TenantManagementPage from './pages/PianatAdmin/TenantManagementPage';
