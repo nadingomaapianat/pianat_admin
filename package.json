@@ -2,10 +2,10 @@
   "name": "pianat-admin-frontend",
   "private": true,
   "version": "1.0.0",
-  "description": "Comply.now Pianat Admin — platform-operator console (separate app, same backend).",
+  "description": "Comply.now Pianat Admin \u2014 platform-operator console (separate app, same backend).",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node api.js && vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
