@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, LayoutDashboard, FileText, DollarSign, LogOut, Languages, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Building2, LayoutDashboard, FileText, DollarSign, LogOut, Languages, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TenantProvider, useTenant } from './context/TenantContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { clearToken, getToken } from './services/apiClient';
@@ -30,6 +30,15 @@ const NAV = [
 /** Compact mark shown when the sidebar is collapsed (served from public/). */
 const COMPLY_MARK = '/assets/images/Shield Icon green.svg';
 
+function getInitials(name?: string | null): string {
+  const safe = (name ?? '').trim();
+  if (!safe) return 'PA';
+  const parts = safe.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? 'P';
+  const second = parts[1]?.[0] ?? parts[0]?.[1] ?? 'A';
+  return `${first}${second}`.toUpperCase();
+}
+
 const Sidebar: React.FC = () => {
   const { currentTenant } = useTenant();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -37,12 +46,16 @@ const Sidebar: React.FC = () => {
   const { i18n } = useTranslation();
   const isAr = i18n.language?.startsWith('ar');
   const [collapsed, setCollapsed] = React.useState<boolean>(
-    () => localStorage.getItem('pa_sidebar_collapsed') === '1',
+    () => localStorage.getItem('pa_sidebar') === 'collapsed',
   );
   const toggleCollapsed = () => {
     setCollapsed((c) => {
       const next = !c;
-      localStorage.setItem('pa_sidebar_collapsed', next ? '1' : '0');
+      try {
+        localStorage.setItem('pa_sidebar', next ? 'collapsed' : 'expanded');
+      } catch {
+        /* ignore */
+      }
       return next;
     });
   };
@@ -58,41 +71,42 @@ const Sidebar: React.FC = () => {
   };
   return (
     <aside
-      className={`sticky top-0 h-screen shrink-0 border-r border-white/10 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950 p-3 transition-[width] duration-200 ${
-        collapsed ? 'w-[76px]' : 'w-[280px]'
+      className={`sticky top-0 h-screen shrink-0 border-r border-white/10 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950 ${
+        collapsed ? 'w-[76px] p-2' : 'w-[264px] p-3'
       }`}
     >
       <div className="flex h-full flex-col">
-        {/* Logo + collapse toggle — the logo swaps between full wordmark
-            (open) and compact mark (collapsed). */}
-        <div className="mb-4 pt-2">
-          {collapsed ? (
-            <div className="flex flex-col items-center gap-2">
-              <img src={COMPLY_MARK} alt="Comply.now" className="logo-img h-8 w-8" />
-              <button
-                className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                title="Expand sidebar"
-                aria-label="Expand sidebar"
-                onClick={toggleCollapsed}
-              >
-                <PanelLeftOpen size={16} />
-              </button>
+        <div className={collapsed ? 'mb-3 px-1 pt-1' : 'mb-4 px-2 pt-2'}>
+          <div className="flex items-center justify-between">
+            <div className={collapsed ? 'flex w-full items-center justify-center' : ''}>
+              {collapsed ? (
+                <img src={COMPLY_MARK} alt="Comply.now" className="h-8 w-8" />
+              ) : (
+                <img src={COMPLY_LOGO} alt="Comply.now" className="logo-img h-6 w-auto" />
+              )}
             </div>
-          ) : (
-            <div className="flex items-start justify-between gap-2 px-1">
-              <div className="min-w-0">
-                <img src={COMPLY_LOGO} alt="Comply.now" className="logo-img h-7 w-auto" />
-                <div className="mt-2 text-xs font-semibold text-white/70">Pianat Admin</div>
-              </div>
+            {!collapsed && (
               <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                type="button"
+                onClick={toggleCollapsed}
+                className="grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
                 title="Collapse sidebar"
-                aria-label="Collapse sidebar"
-                onClick={toggleCollapsed}
               >
-                <PanelLeftClose size={16} />
+                <ChevronLeft size={15} />
               </button>
-            </div>
+            )}
+          </div>
+          {collapsed ? (
+            <button
+              type="button"
+              onClick={toggleCollapsed}
+              className="mt-2 grid w-full place-items-center rounded-xl border border-white/10 bg-white/5 py-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title="Expand sidebar"
+            >
+              <ChevronRight size={15} />
+            </button>
+          ) : (
+            <div className="mt-2 text-xs font-semibold text-white/70">Pianat Admin</div>
           )}
         </div>
 
@@ -103,55 +117,80 @@ const Sidebar: React.FC = () => {
               to={to}
               title={collapsed ? label : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-2 rounded-xl py-2 text-sm transition-colors ${
-                  collapsed ? 'justify-center px-0' : 'px-3'
-                } ${
+                `flex items-center rounded-xl text-sm transition-colors ${
                   isActive
                     ? 'bg-white/10 font-semibold text-white'
                     : 'text-white/75 hover:bg-white/5 hover:text-white'
-                }`
+                } ${collapsed ? 'justify-center px-2 py-2.5' : 'gap-2 px-3 py-2'}`
               }
             >
-              <Icon size={16} className="shrink-0" />
+              <Icon size={16} />
               {!collapsed && <span className="truncate">{label}</span>}
             </NavLink>
           ))}
         </nav>
 
-        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-2 shadow-sm">
-          {!collapsed && (
+        {collapsed ? (
+          <div className="mt-3 grid gap-1 rounded-2xl border border-white/10 bg-white/5 p-2 shadow-sm">
+            <div className="grid place-items-center rounded-xl bg-white/5 py-2 text-xs font-semibold text-white/85">
+              <div className="grid h-8 w-8 place-items-center rounded-xl bg-white/10 text-xs font-bold text-white">
+                {getInitials(currentTenant?.username ?? currentTenant?.name)}
+              </div>
+            </div>
+            <button
+              className="grid h-8 w-full place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            <button
+              className="grid h-8 w-full place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title="Change language"
+              onClick={toggleLang}
+            >
+              <Languages size={14} />
+            </button>
+            <button
+              className="grid h-8 w-full place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-rose-300"
+              title="Sign out"
+              onClick={logout}
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-2 shadow-sm">
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white/85">
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
               <span className="truncate">{currentTenant?.username ?? currentTenant?.name ?? 'Signed in'}</span>
             </div>
-          )}
-          <div className={`flex items-center gap-1 ${collapsed ? 'flex-col' : ''}`}>
-            <button
-              className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              onClick={toggleTheme}
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-            <button
-              className={`flex h-9 items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white ${
-                collapsed ? 'w-9' : 'flex-1 px-2'
-              }`}
-              title="Change language"
-              onClick={toggleLang}
-            >
-              <Languages size={15} />
-              {!collapsed && (isAr ? 'AR' : 'EN')}
-            </button>
-            <button
-              className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-rose-300"
-              title="Sign out"
-              onClick={logout}
-            >
-              <LogOut size={16} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                onClick={toggleTheme}
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+              <button
+                className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                title="Change language"
+                onClick={toggleLang}
+              >
+                <Languages size={15} />
+                {isAr ? 'AR' : 'EN'}
+              </button>
+              <button
+                className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-rose-300"
+                title="Sign out"
+                onClick={logout}
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );
