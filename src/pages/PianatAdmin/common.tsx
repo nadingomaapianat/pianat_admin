@@ -16,12 +16,25 @@ export { useIsAr, tr, useAsync, Loading, ErrorBox, Panel } from '../TenantAdmin/
  * Header action-button styles — compact, white with a thin gray border
  * (default) or brand-green-filled (primary). Unified to the Comply.now green.
  */
+/** Ghost/secondary — adapts to both themes via CSS vars */
 export const headerBtn =
-  'inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 ' +
-  'text-xs font-medium text-slate-800 no-underline transition hover:bg-slate-100 disabled:opacity-60';
+  'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 ' +
+  'text-xs font-semibold no-underline transition-colors disabled:opacity-60 ' +
+  'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] ' +
+  'hover:bg-[var(--surface-hover)] hover:text-[var(--text-strong)]';
+
+/** Brand-filled primary */
 export const headerBtnPrimary =
-  'inline-flex items-center gap-1.5 rounded-md border border-emerald-700 bg-emerald-600 px-3 py-1.5 ' +
-  'text-xs font-medium text-white no-underline transition hover:bg-emerald-700 disabled:opacity-60';
+  'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 ' +
+  'text-xs font-semibold text-white no-underline transition-colors disabled:opacity-60 ' +
+  'bg-[var(--brand)] border-[var(--brand-hover)] hover:bg-[var(--brand-hover)]';
+
+/** Danger — suspend / destructive actions */
+export const headerBtnDanger =
+  'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 ' +
+  'text-xs font-semibold no-underline transition-colors disabled:opacity-60 ' +
+  'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 ' +
+  'dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20';
 
 /** Wrap a Pianat page; redirects non-operators to login. */
 export const PlatformOperatorGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -48,7 +61,8 @@ export const PianatShell: React.FC<{
     <PlatformOperatorGate>
       <div
         dir={isAr ? 'rtl' : 'ltr'}
-        className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 px-6 py-6"
+        className="min-h-full px-6 py-6"
+        style={{ background: 'var(--canvas-bg)' }}
       >
         <div className="rounded-3xl bg-gradient-to-br from-emerald-600 via-green-600 to-teal-600 p-6 text-white shadow-xl">
           <div className="flex flex-wrap items-start justify-between gap-4">
