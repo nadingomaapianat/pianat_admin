@@ -32,6 +32,7 @@ export interface TenantTemplate {
   is_active: boolean;
 }
 
+
 export async function getModuleCatalog(archetype?: string): Promise<ModuleCatalogEntry[]> {
   const q = archetype ? `?archetype=${encodeURIComponent(archetype)}` : '';
   return api.get<ModuleCatalogEntry[]>(`/api/pianat-admin/module-catalog${q}`);
@@ -378,4 +379,72 @@ export async function getInsightsStatus(): Promise<{ agent: string; enabled: boo
 }
 export async function runPlatformInsights(): Promise<any> {
   return api.post('/api/pianat-admin/insights/run');
+}
+
+// ── Organization (tenant-ids endpoint) ──────────────────────────────────
+
+export interface OrgLicense {
+  family: string;
+  name: string;
+}
+
+export interface OrganizationInfo {
+  id: string;
+  name: string;
+  nameAr: string | null;
+  logoUrl: string | null;
+  slug: string;
+  contactInfo: string | null;
+  industry: string | null;
+  image: string | null;
+  score: number;
+  approved: boolean;
+  type: string;
+  parentTenantId: string | null;
+  tenantPath: string | null;
+  tenantDepth: number;
+  tenantType: string;
+  archetype: string;
+  isActive: boolean;
+  isRoot: boolean;
+  disabledModules: string[];
+  entityId: string | null;
+  licenses: OrgLicense[];
+  businessActivities: any;
+  marketProfile: any;
+  activeFrameworks: string[] | null;
+  dataResidencyRegion: string | null;
+  defaultLanguage: string;
+  uiDirection: string;
+  enabledModules: string[] | null;
+  enabledAiAgents: string[] | null;
+  usageLimits: Record<string, number> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /tenant/tenant-ids — returns all organizations visible to the caller. */
+export async function getAllOrganization(): Promise<OrganizationInfo[]> {
+  const result = await api.get<OrganizationInfo[] | { tenant_ids: string[] } | any>('/tenant/tenant-ids');
+  /* Normalise: the endpoint may return an array directly or wrap it */
+  if (Array.isArray(result)) return result;
+  if (result && Array.isArray(result.tenant_ids)) {
+    return (result.tenant_ids as string[]).map((id: string) => ({ id } as OrganizationInfo));
+  }
+  return [];
+}
+
+/** GET /tenant/:id — returns a single organization by tenant ID. */
+export async function getOrganizationById(id: string): Promise<OrganizationInfo | null> {
+  try {
+    const result = await api.get<{ success: boolean; data: OrganizationInfo } | OrganizationInfo | any>(
+      `/tenant/${encodeURIComponent(id)}`,
+    );
+    if (!result) return null;
+    /* Unwrap { success, data } envelope if present */
+    const org: OrganizationInfo = result.success && result.data ? result.data : result;
+    return { ...org, id: org.id ?? id };
+  } catch {
+    return null;
+  }
 }
